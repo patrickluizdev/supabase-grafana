@@ -54,6 +54,29 @@ else
   done
 fi
 
+# Configure Azure PostgreSQL if enabled
+if [ "$AZURE_POSTGRES_ENABLED" = "true" ]; then
+  echo "Setting up Azure PostgreSQL monitoring."
+  
+  if [ -z "$AZURE_POSTGRES_NAME" ]; then
+    echo "\$AZURE_POSTGRES_NAME is not set. Skipping Azure PostgreSQL monitoring."
+  elif [ -z "$AZURE_POSTGRES_HOST" ]; then
+    echo "\$AZURE_POSTGRES_HOST is not set. Skipping Azure PostgreSQL monitoring."
+  elif [ -z "$AZURE_POSTGRES_USER" ]; then
+    echo "\$AZURE_POSTGRES_USER is not set. Skipping Azure PostgreSQL monitoring."
+  elif [ -z "$AZURE_POSTGRES_PASSWORD" ]; then
+    echo "\$AZURE_POSTGRES_PASSWORD is not set. Skipping Azure PostgreSQL monitoring."
+  else
+    cat /etc/prometheus/azure-postgres.target.yml.tpl >> /etc/prometheus/prometheus.yml
+    
+    sed -i "s/__AZURE_POSTGRES_NAME__/$AZURE_POSTGRES_NAME/g" /etc/prometheus/prometheus.yml
+    sed -i "s/__AZURE_POSTGRES_HOST__/$AZURE_POSTGRES_HOST/g" /etc/prometheus/prometheus.yml
+    sed -i "s/__AZURE_POSTGRES_PORT__/$AZURE_POSTGRES_PORT/g" /etc/prometheus/prometheus.yml
+    sed -i "s/__AZURE_POSTGRES_USER__/$AZURE_POSTGRES_USER/g" /etc/prometheus/prometheus.yml
+    sed -i "s/__AZURE_POSTGRES_PASSWORD__/$AZURE_POSTGRES_PASSWORD/g" /etc/prometheus/prometheus.yml
+  fi
+fi
+
 mkdir -p /data/grafana/data 
 mkdir -p /data/grafana/plugins 
 mkdir -p /data/prometheus
